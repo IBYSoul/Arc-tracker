@@ -3,52 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARC Raiders - Global Tracker</title>
+    <title>ARC RAIDERS // TACTICAL FEED</title>
     <style>
-        /* Dark Theme & Kylie Style */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0d; color: #e0e0e0; margin: 0; padding: 20px; }
-        
-        h1 { color: #ff3e3e; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 30px; }
-        
-        /* Controls */
-        .controls { background: #1a1a1a; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #333; max-width: 800px; margin-left: auto; margin-right: auto; text-align: center; }
-        select { padding: 12px; margin: 5px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 6px; font-size: 16px; max-width: 90%; }
-        button { padding: 12px 25px; margin: 5px; background: #ff3e3e; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
-        button:hover { background: #d32f2f; }
-        
-        /* Map Grid */
-        .tracker-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        
-        .map-card { background: #161616; border: 1px solid #333; padding: 20px; border-radius: 10px; position: relative; overflow: hidden; }
-        .map-name { font-weight: 800; font-size: 1.4em; color: #fff; margin-bottom: 10px; text-transform: uppercase; }
-        
-        /* Status Styles */
-        .status-box { min-height: 40px; display: flex; align-items: center; }
-        .status-clear { color: #4caf50; font-weight: bold; letter-spacing: 1px; } /* Green */
-        .status-pending { color: #ff9800; font-weight: bold; } /* Orange */
-        .status-active { color: #ff3e3e; font-weight: bold; text-shadow: 0 0 10px rgba(255, 62, 62, 0.4); animation: pulse 2s infinite; } /* Red */
+        /* --- FONTS & VARS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap');
 
-        .votes-count { font-size: 0.8em; color: #888; margin-left: 10px; }
+        :root {
+            --arc-red: #ff3e3e;
+            --arc-orange: #ff9800;
+            --arc-yellow: #ffeb3b;
+            --arc-blue: #2196f3;
+            --bg-dark: #0a0a0a;
+            --card-bg: rgba(20, 20, 20, 0.85);
+            --text-main: #e0e0e0;
+            --neon-green: #00ff41;
+        }
 
-        /* Discord */
-        .discord-section { text-align: center; margin-top: 50px; }
-        .discord-btn { background-color: #5865F2; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; display: inline-block; }
-        .discord-btn:hover { background-color: #4752c4; }
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            
+            /* --- BACKGROUND IMAGE FIX --- */
+            /* Note: L'image doit être dans le dossier "public" directement */
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
+                url('site-bg.jpg'); 
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+        }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        /* Scanline Overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* --- HEADER --- */
+        .rainbow-strip {
+            height: 6px; width: 100%;
+            background: linear-gradient(to right, 
+                #ff3e3e 0%, #ff3e3e 20%, 
+                #ff9800 20%, #ff9800 40%, 
+                #ffeb3b 40%, #ffeb3b 60%, 
+                #4caf50 60%, #4caf50 80%, 
+                #2196f3 80%, #2196f3 100%);
+            box-shadow: 0 0 15px rgba(255, 62, 62, 0.5);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        header {
+            text-align: center; padding: 40px 20px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 3.5em; margin: 0;
+            letter-spacing: 6px;
+            text-shadow: 0px 0px 20px rgba(0,0,0,0.8);
+            font-weight: 700;
+        }
+        
+        h1 span { color: var(--arc-red); }
+
+        /* --- CONTROLS --- */
+        .controls {
+            background: rgba(15, 15, 15, 0.9);
+            padding: 25px;
+            border: 1px solid #444;
+            border-left: 5px solid var(--arc-red);
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .controls::before {
+            content: "SYSTEM // ONLINE";
+            position: absolute; top: 5px; right: 10px;
+            font-family: 'Roboto Mono', monospace; font-size: 0.6em;
+            color: var(--neon-green); animation: blink 2s infinite;
+        }
+
+        .controls h3 { margin-top: 0; color: var(--arc-red); font-family: 'Roboto Mono', monospace; }
+
+        select {
+            background: rgba(0,0,0,0.6); color: #fff;
+            border: 1px solid #555; padding: 12px;
+            font-family: 'Roboto Mono', monospace;
+            margin: 5px; width: 100%; max-width: 300px;
+            text-transform: uppercase;
+        }
+
+        button {
+            background: var(--arc-red); color: black; border: none;
+            padding: 12px 30px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: 0.2s;
+        }
+        button:hover { background: white; box-shadow: 0 0 15px white; }
+
+        /* --- MAPS GRID --- */
+        .tracker-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px 50px 20px;
+        }
+
+        /* --- CARDS --- */
+        .map-card {
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            display: flex; flex-direction: column; justify-content: space-between;
+            backdrop-filter: blur(5px);
+        }
+
+        .map-card:hover { border-color: #888; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+
+        /* Dynamic Image Background */
+        .card-bg-image {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            opacity: 0.2;
+            transition: 0.5s;
+            filter: grayscale(100%);
+            z-index: 0;
+        }
+
+        .map-card.danger { border: 1px solid var(--arc-red); }
+        .map-card.danger .card-bg-image {
+            opacity: 0.5;
+            filter: grayscale(0%) sepia(20%) contrast(1.2);
+        }
+
+        .card-content {
+            position: relative; z-index: 2; padding: 20px; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-between;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+
+        .map-name {
+            font-size: 1.6em; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; text-shadow: 2px 2px 0 #000; color: #fff;
+        }
+
+        .status-box { font-family: 'Roboto Mono', monospace; font-size: 0.9em; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 4px; display: inline-block; }
+        
+        .status-clear { color: var(--neon-green); text-shadow: 0 0 5px var(--neon-green); }
+        .status-active { color: var(--arc-red); font-weight: bold; font-size: 1.1em; text-shadow: 0 0 10px red; animation: glitch 1s infinite; }
+        .status-pending { color: var(--arc-orange); }
+
+        /* Corner Badge */
+        .card-corner {
+            position: absolute; top: 0; right: 0; width: 0; height: 0;
+            border-style: solid; border-width: 0 40px 40px 0;
+            border-color: transparent var(--arc-red) transparent transparent;
+            z-index: 3; opacity: 0; transition: opacity 0.3s;
+        }
+        .map-card.danger .card-corner { opacity: 1; }
+
+        /* --- DISCORD --- */
+        .discord-section { text-align: center; margin-top: 20px; margin-bottom: 60px; }
+        .discord-btn {
+            background: #5865F2; color: white;
+            padding: 15px 40px; text-decoration: none;
+            font-family: 'Roboto Mono', monospace; font-weight: bold; text-transform: uppercase;
+            border: 1px solid #fff; box-shadow: 5px 5px 0px #000;
+            transition: 0.2s; display: inline-block;
+        }
+        .discord-btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
+
+        @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <h1>ARC RAIDERS // GLOBAL INTEL</h1>
+    <div class="rainbow-strip"></div>
+
+    <header>
+        <h1>ARC <span>RAIDERS</span></h1>
+        <div style="font-family: 'Roboto Mono'; font-size: 0.9em; letter-spacing: 3px; color: #aaa; text-shadow: 1px 1px 2px black;">
+            // GLOBAL THREAT TRACKER
+        </div>
+    </header>
     
     <div class="controls">
-        <h3 style="margin-top: 0;">REPORT ACTIVITY</h3>
-        <select id="mapSelect"><option>Loading maps...</option></select>
-        <select id="eventSelect"><option>Loading events...</option></select>
-        <button onclick="sendReport()">SEND REPORT</button>
-        <p style="font-size: 0.9em; color: #888; margin-top: 10px;">
-            ⚠️ <strong>3 confirmations</strong> needed. Limit: 1 report per map every 30 mins.
+        <h3>/// TRANSMISSION UPLINK</h3>
+        <select id="mapSelect"><option>INITIALIZING...</option></select>
+        <select id="eventSelect"><option>SCANNING...</option></select>
+        <button onclick="sendReport()">TRANSMIT</button>
+        <p style="font-size: 0.8em; color: #888; margin-top: 15px; font-family: 'Roboto Mono';">
+            > PROTOCOL: 3 CONFIRMATIONS REQUIRED<br>
+            > COOLDOWN: 30 MINUTES PER SECTOR
         </p>
     </div>
 
@@ -57,7 +223,7 @@
 
     <div class="discord-section">
         <a href="https://discord.gg/arcraiders" target="_blank" class="discord-btn">
-            Join ARC Raiders Discord
+            :: JOIN RESISTANCE FREQUENCY ::
         </a>
     </div>
 
@@ -65,22 +231,17 @@
     <script>
         const socket = io();
 
-        // 1. Setup Dropdowns
         socket.on('setup_data', (data) => {
             const mapSelect = document.getElementById('mapSelect');
             const eventSelect = document.getElementById('eventSelect');
-            
             mapSelect.innerHTML = data.maps.map(m => `<option value="${m}">${m}</option>`).join('');
             eventSelect.innerHTML = data.events.map(e => `<option value="${e}">${e}</option>`).join('');
         });
 
-        // 2. Realtime Update Logic
         socket.on('init_state', (gameState) => renderTracker(gameState));
         socket.on('update_state', (gameState) => renderTracker(gameState));
-
-        // 3. User Feedback (Alerts)
-        socket.on('error_message', (msg) => alert("⛔ BLOCK: " + msg));
-        socket.on('success_message', (msg) => console.log("Success:", msg)); // Optional: alert("✅ " + msg);
+        socket.on('error_message', (msg) => alert("⛔ UPLINK DENIED: " + msg));
+        socket.on('success_message', (msg) => console.log("Transmission sent:", msg));
 
         function sendReport() {
             const map = document.getElementById('mapSelect').value;
@@ -94,31 +255,44 @@
 
             Object.keys(gameState).forEach(mapName => {
                 const data = gameState[mapName];
+                
                 let statusHtml = '';
+                let bgImage = ''; 
+                let cardClass = 'map-card';
 
-                // Is the map clear?
                 const isClear = !data.event || data.event === "No Active Event (Clear Map)";
 
                 if (isClear) {
                     if (data.event === "No Active Event (Clear Map)" && !data.confirmed) {
-                         // Voting to clear
-                         statusHtml = `<span class="status-pending">⏳ Verifying Clear Status... <span class="votes-count">(${data.votes}/3)</span></span>`;
+                         statusHtml = `<span class="status-pending">>> VERIFYING CLEAR (${data.votes}/3)</span>`;
                     } else {
-                        // Truly clear
-                        statusHtml = '<span class="status-clear">● STATUS CLEAR</span>';
+                        statusHtml = '<span class="status-clear">● SECTOR CLEAR</span>';
                     }
                 } else if (data.confirmed) {
-                    // ACTIVE EVENT (RED)
-                    statusHtml = `<span class="status-active">⚠️ ${data.event} ACTIVE</span>`;
+                    // DANGER ACTIF
+                    cardClass += ' danger';
+                    statusHtml = `<span class="status-active">⚠️ ${data.event} DETECTED</span>`;
+                    
+                    // --- IMAGE LOGIC (Direct file access) ---
+                    if(data.event.includes("Matriarch") || data.event.includes("Harvester") || data.event.includes("Spider")) {
+                        bgImage = 'boss.jpg'; // Plus de "img/"
+                    } 
+                    else if(data.event.includes("Probe") || data.event.includes("Drone") || data.event.includes("Sondes")) {
+                        bgImage = 'drone.png'; // Plus de "img/"
+                    }
                 } else {
-                    // PENDING (ORANGE)
-                    statusHtml = `<span class="status-pending">⏳ ${data.event} <span class="votes-count">(${data.votes}/3)</span></span>`;
+                    // PENDING
+                    statusHtml = `<span class="status-pending">>> ANALYZING SIGNAL... (${data.votes}/3)</span><br><small style="color:#aaa">${data.event}</small>`;
                 }
 
                 const card = `
-                    <div class="map-card">
-                        <div class="map-name">${mapName}</div>
-                        <div class="status-box">${statusHtml}</div>
+                    <div class="${cardClass}">
+                        <div class="card-corner"></div>
+                        <div class="card-bg-image" style="background-image: url('${bgImage}');"></div>
+                        <div class="card-content">
+                            <div class="map-name">${mapName}</div>
+                            <div class="status-box">${statusHtml}</div>
+                        </div>
                     </div>
                 `;
                 container.innerHTML += card;
@@ -127,3 +301,4 @@
     </script>
 </body>
 </html>
+
