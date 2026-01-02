@@ -6,11 +6,11 @@ const path = require('path');
 const app = express();
 const server = http.createServer(app);
 
-// Configuration pour récupérer la vraie IP sur Render
+// Configuration essentielle pour récupérer la vraie IP sur Render
 app.set('trust proxy', true);
 
 const io = new Server(server, {
-    cors: { origin: "*" }
+    cors: { origin: "*" } // Autorise les connexions de partout
 });
 
 // --- CONFIGURATION ---
@@ -117,7 +117,9 @@ function resetMap(mapName) {
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+
+// --- MODIFICATION CRITIQUE ICI ---
+// On ajoute '0.0.0.0' pour écouter toutes les connexions externes
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
-
